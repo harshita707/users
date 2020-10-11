@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
                         intent.putExtra("userMobile", user_mobile.get(current_user));
                         intent.putExtra("userAddress", user_address.get(current_user));
                         LoginActivity.this.startActivity(intent);
-                        finish();
                     } else {
                         password.setError("Incorrect Password");
                     }

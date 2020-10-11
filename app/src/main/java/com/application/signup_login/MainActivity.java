@@ -1,20 +1,16 @@
 package com.application.signup_login;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
-import androidx.appcompat.widget.Toolbar;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.application.signup_login.adapter.UserDetailsAdpter;
 import com.application.signup_login.api.ApiUtils;
@@ -22,7 +18,6 @@ import com.application.signup_login.model.Item;
 import com.application.signup_login.model.UserDetails;
 import com.application.signup_login.model.Users;
 import com.application.signup_login.utils.RecyclerViewClickListener;
-import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,72 +26,83 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
-
-    private DrawerLayout drawer;
-    ActionBarDrawerToggle toggle;
+    private ArrayList<Item> itemArrayList =new ArrayList<>();
+    private ProgressDialog dialog;
+    Button profile_btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final Intent myintent = getIntent();
 
+        profile_btn = findViewById(R.id.profile_btn);
 
-        drawer = findViewById(R.id.drawer_layout);
-        NavigationView nv = (NavigationView) findViewById(R.id.nav_view);
-        nv.setNavigationItemSelectedListener(this);
+        profile_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                intent.putExtra("userFname", myintent.getStringExtra("userFname"));
+                intent.putExtra("userLname", myintent.getStringExtra("userLname"));
+                intent.putExtra("userEmail", myintent.getStringExtra("userEmail"));
+                intent.putExtra("userMobile", myintent.getStringExtra("userMobile"));
+                intent.putExtra("userAddress", myintent.getStringExtra("userAddress"));
+                MainActivity.this.startActivity(intent);
+                finish();
+            }
+        });
 
-        toggle = new ActionBarDrawerToggle(this, drawer,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        dialog = new ProgressDialog(this);
+        dialog.setTitle("Please wait...");
+        dialog.show();
 
+        Call<Users> call = ApiUtils.getApiService().getUsers("1");
+        call.enqueue(new Callback<Users>() {
+            @Override
+            public void onResponse(Call<Users> call, Response<Users> response) {
+                if (!response.isSuccessful()) {
+                    Log.e("Server error", "" + response.code());
+                    Toast.makeText(MainActivity.this, "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Users result = response.body();
+                    List<UserDetails> userDetailsList = result.getData();
 
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+                    for (int i = 0; i < userDetailsList.size(); i++) {
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    new HomeFragment()).commit();
-            nv.setCheckedItem(R.id.nav_home);
+                        UserDetails currentArticle = userDetailsList.get(i);
+                        itemArrayList.add(new Item(currentArticle.getEmail(),
+                                currentArticle.getFirstName(), currentArticle.getLastName()));
 
-        }
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+                    }
+                    RecyclerView recyclerView = findViewById(R.id.recycler_view);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-        if(toggle.onOptionsItemSelected(item))
-            return true;
+                    RecyclerViewClickListener listener = new RecyclerViewClickListener() {
+                        @Override
+                        public void onClick(View view, int position) {
+                            CustomDialogClass cdd=new CustomDialogClass(MainActivity.this);
+                            cdd.show();
 
-        return super.onOptionsItemSelected(item);
-    }
+                        }
+                    };
 
-    @Override
-    public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-                switch(item.getItemId())
-                {
-                    case R.id.nav_profile:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                new ProfileFragment()).commit();
-                        break;
-                    case R.id.nav_home:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                new HomeFragment()).commit();
-                        break;
+                    UserDetailsAdpter adapter = new UserDetailsAdpter(itemArrayList,MainActivity.this, listener);
+                    recyclerView.setAdapter(adapter);
+                    dialog.dismiss();
                 }
-                drawer.closeDrawer(GravityCompat.START);
-        return true;
+            }
+
+            @Override
+            public void onFailure(Call<Users> call, Throwable t) {
+                Log.e("Callback failure", t.getMessage());
+                Toast.makeText(MainActivity.this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
+
+
 }
