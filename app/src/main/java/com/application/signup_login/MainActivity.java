@@ -20,6 +20,8 @@ import com.application.signup_login.model.Users;
 import com.application.signup_login.utils.RecyclerViewClickListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -28,7 +30,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<Item> itemArrayList =new ArrayList<>();
+    private ArrayList<Item> itemArrayList = new ArrayList<>();
     private ProgressDialog dialog;
     Button profile_btn;
 
@@ -77,19 +79,29 @@ public class MainActivity extends AppCompatActivity {
                                 currentArticle.getFirstName(), currentArticle.getLastName()));
 
                     }
+                    Collections.sort(itemArrayList, new Comparator<Item>() {
+                        @Override
+                        public int compare(Item o1, Item o2) {
+                            if (o1.getFname().compareTo(o2.getFname()) == 0) {
+                                return o1.getLname().compareTo(o2.getLname());
+                            } else {
+                                return o1.getFname().compareTo(o2.getFname());
+                            }
+                        }
+                    });
                     RecyclerView recyclerView = findViewById(R.id.recycler_view);
                     recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
                     RecyclerViewClickListener listener = new RecyclerViewClickListener() {
                         @Override
                         public void onClick(View view, int position) {
-                            CustomDialogClass cdd=new CustomDialogClass(MainActivity.this, position);
+                            CustomDialogClass cdd = new CustomDialogClass(MainActivity.this, position);
                             cdd.show();
 
                         }
                     };
 
-                    UserDetailsAdpter adapter = new UserDetailsAdpter(itemArrayList,MainActivity.this, listener);
+                    UserDetailsAdpter adapter = new UserDetailsAdpter(itemArrayList, MainActivity.this, listener);
                     recyclerView.setAdapter(adapter);
                     dialog.dismiss();
                 }

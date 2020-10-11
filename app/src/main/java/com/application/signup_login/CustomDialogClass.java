@@ -38,7 +38,6 @@ public class CustomDialogClass extends Dialog implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_yes:
-
                 dismiss();
                 break;
             case R.id.btn_no:
