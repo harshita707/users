@@ -6,23 +6,23 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class ProfileActivity extends AppCompatActivity {
+public class Profile extends AppCompatActivity {
 
     public TextView fname_tv, lname_tv, email_tv,mobile_tv, address_tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.profile);
 
-         Intent myintent = getIntent();
+        Intent myintent = getIntent();
 
-         String fname = myintent.getStringExtra("userFname");
-         String lname = myintent.getStringExtra("userLname");
-         String email = myintent.getStringExtra("userEmail");
-         String mobile = myintent.getStringExtra("userMobile");
-         String address = myintent.getStringExtra("userAddress");
+        String fname = myintent.getStringExtra("userFname");
+        String lname = myintent.getStringExtra("userLname");
+        String email = myintent.getStringExtra("userEmail");
+        String mobile = myintent.getStringExtra("userMobile");
+        String address = myintent.getStringExtra("userAddress");
 
-         fname_tv = findViewById(R.id.user_fname);
+        fname_tv = findViewById(R.id.user_fname);
         lname_tv = findViewById(R.id.user_lname);
         email_tv = findViewById(R.id.user_email);
         mobile_tv = findViewById(R.id.user_mobile);

@@ -13,11 +13,13 @@ public class CustomDialogClass extends Dialog implements
     public Activity c;
     public Dialog d;
     public Button yes, no;
+    public int pos;
 
-    public CustomDialogClass(Activity a ) {
+    public CustomDialogClass(Activity a, int position ) {
         super(a);
         // TODO Auto-generated constructor stub
         this.c = a;
+        this.pos = position;
     }
 
     @Override
@@ -36,6 +38,7 @@ public class CustomDialogClass extends Dialog implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_yes:
+
                 dismiss();
                 break;
             case R.id.btn_no:

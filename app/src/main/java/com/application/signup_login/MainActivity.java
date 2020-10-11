@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         profile_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                Intent intent = new Intent(MainActivity.this, Profile.class);
                 intent.putExtra("userFname", myintent.getStringExtra("userFname"));
                 intent.putExtra("userLname", myintent.getStringExtra("userLname"));
                 intent.putExtra("userEmail", myintent.getStringExtra("userEmail"));
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     RecyclerViewClickListener listener = new RecyclerViewClickListener() {
                         @Override
                         public void onClick(View view, int position) {
-                            CustomDialogClass cdd=new CustomDialogClass(MainActivity.this);
+                            CustomDialogClass cdd=new CustomDialogClass(MainActivity.this, position);
                             cdd.show();
 
                         }
