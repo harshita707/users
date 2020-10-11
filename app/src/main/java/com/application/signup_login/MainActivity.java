@@ -1,14 +1,20 @@
 package com.application.signup_login;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import com.application.signup_login.adapter.UserDetailsAdpter;
 import com.application.signup_login.api.ApiUtils;
@@ -16,6 +22,7 @@ import com.application.signup_login.model.Item;
 import com.application.signup_login.model.UserDetails;
 import com.application.signup_login.model.Users;
 import com.application.signup_login.utils.RecyclerViewClickListener;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,66 +31,72 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ArrayList<Item> itemArrayList =new ArrayList<>();
-    private ProgressDialog dialog;
+
+    private DrawerLayout drawer;
+    ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dialog = new ProgressDialog(this);
-        dialog.setTitle("Please wait...");
-        dialog.show();
 
-        Call<Users> call = ApiUtils.getApiService().getUsers("1");
-        call.enqueue(new Callback<Users>() {
-            @Override
-            public void onResponse(Call<Users> call, Response<Users> response) {
-                if (!response.isSuccessful()) {
-                    Log.e("Server error", "" + response.code());
-                    Toast.makeText(getApplicationContext(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Users result = response.body();
-                    List<UserDetails> userDetailsList = result.getData();
 
-                    for (int i = 0; i < userDetailsList.size(); i++) {
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView nv = (NavigationView) findViewById(R.id.nav_view);
+        nv.setNavigationItemSelectedListener(this);
 
-                        UserDetails currentArticle = userDetailsList.get(i);
-                        itemArrayList.add(new Item(currentArticle.getEmail(),
-                                currentArticle.getFirstName(), currentArticle.getLastName()));
+        toggle = new ActionBarDrawerToggle(this, drawer,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
-                    }
-                    RecyclerView recyclerView = findViewById(R.id.recycler_view);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-                    RecyclerViewClickListener listener = new RecyclerViewClickListener() {
-                        @Override
-                        public void onClick(View view, int position) {
-                            Toast.makeText(getBaseContext(), "Position " + position,
-                                    Toast.LENGTH_SHORT).show();
-                            CustomDialogClass cdd=new CustomDialogClass(MainActivity.this);
-                            cdd.show();
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
-                        }
-                    };
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new HomeFragment()).commit();
+            nv.setCheckedItem(R.id.nav_home);
 
-                    UserDetailsAdpter adapter = new UserDetailsAdpter(itemArrayList,getBaseContext(), listener);
-                    recyclerView.setAdapter(adapter);
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-                    dialog.dismiss();
+        if(toggle.onOptionsItemSelected(item))
+            return true;
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch(item.getItemId())
+                {
+                    case R.id.nav_profile:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new ProfileFragment()).commit();
+                        break;
+                    case R.id.nav_home:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new HomeFragment()).commit();
+                        break;
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Users> call, Throwable t) {
-                Log.e("Callback failure", t.getMessage());
-                Toast.makeText(MainActivity.this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
+                drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
